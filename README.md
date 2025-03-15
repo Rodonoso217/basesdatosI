@@ -1,6 +1,7 @@
 # entregable#1
 Tabla de identidades: 
 •	users: Almacena información de usuarios del sistema 
+
 •	userroles: Relaciona usuarios con sus roles asignados 
 •	roles: Catálogo de roles disponibles en el sistema 
 •	permissions: Catálogo de permisos individuales 
