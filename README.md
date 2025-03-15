@@ -1,36 +1,66 @@
 # entregable#1
 Tabla de identidades: 
+
 •	users: Almacena información de usuarios del sistema 
 
-•	userroles: Relaciona usuarios con sus roles asignados 
-•	roles: Catálogo de roles disponibles en el sistema 
+•	userroles: Relaciona usuarios con sus roles asignados
+
+•	roles: Catálogo de roles disponibles en el sistema
+
 •	permissions: Catálogo de permisos individuales 
+
 •	rolepermissions: Relación muchos a muchos entre roles y permisos 
+
 •	userpermissions: Permisos específicos asignados directamente a usuarios 
+
 •	plans: Planes o paquetes disponibles para suscripción 
+
 •	planfeatures: Características específicas de cada plan 
+
 •	planpricing: Precios y periodos de facturación para los planes 
+
 •	planxperson: Asignación de características de plan a personas específicas 
+
 •	usersubscriptions: Registro de suscripciones activas de usuarios 
+
 •	paymentmethods: Catálogo de métodos de pago disponibles 
+
 •	userpaymentmethods: Métodos de pago configurados por cada usuario 
+
 •	payments: Registro de pagos realizados en el sistema 
+
 •	transactions: Registro de transacciones financieras 
+
 •	transactionType: Tipos de transacciones disponibles 
+
 •	transactionSubTypes: Subtipos específicos de transacciones 
+
 •	currencies: Catálogo de monedas soportadas por el sistema 
+
 •	exchangeRate: Tasas de cambio entre diferentes monedas 
+
 •	notificationtype: Tipos de notificaciones configurados 
+
 •	notificationtemplate: Plantillas para los diferentes tipos de notificaciones 
+
 •	notifications: Registro de notificaciones enviadas 
+
 •	files: Registro de archivos almacenados en el sistema 
+
 •	languages: Idiomas disponibles en el sistema 
+
 •	translation: Traducciones para la internacionalización del sistema 
+
 •	modules: Módulos funcionales del sistema 
+
 •	logs: Registro de actividades y eventos del sistema 
+
 •	logseverity: Niveles de severidad para las entradas de log 
+
 •	logtypes: Tipos de entradas de log 
+
 •	logsources: Fuentes u orígenes de las entradas de log
+
 
 Ahora explicaremos más a fondo las principales identidades:
 
