@@ -5,65 +5,65 @@ Adrian Josue Barquero Sanchez-2024146907
 
 Tabla de identidades: 
 
-•	users: Almacena información de usuarios del sistema 
+•	users: Almacena información de usuarios del sistema. PK: userid (INT)
 
-•	userroles: Relaciona usuarios con sus roles asignados
+•	userroles: Relaciona usuarios con sus roles asignados. PK: roleid(int), userid(INT)
 
-•	roles: Catálogo de roles disponibles en el sistema
+•	roles: Catálogo de roles disponibles en el sistema. PK: roleid(int)
 
-•	permissions: Catálogo de permisos individuales 
+•	permissions: Catálogo de permisos individuales. PK: permissionid(INT) FK: moduleid(INT) 
 
-•	rolepermissions: Relación muchos a muchos entre roles y permisos 
+•	rolepermissions: Relación muchos a muchos entre roles y permisos. PK: rolepermissionid(INT) FK: permissionid(INT), roleid(int) 
 
-•	userpermissions: Permisos específicos asignados directamente a usuarios 
+•	userpermissions: Permisos específicos asignados directamente a usuarios. PK: rolepermissionid(INT) FK: permissionid(INT), userid(INT) 
 
-•	plans: Planes o paquetes disponibles para suscripción 
+•	plans: Planes o paquetes disponibles para suscripción. PK: plansid (TINYINT) 
 
-•	planfeatures: Características específicas de cada plan 
+•	planfeatures: Características específicas de cada plan. PK: featureid(TINYINT) FK: plansid(INT)
 
-•	planpricing: Precios y periodos de facturación para los planes 
+•	planpricing: Precios y periodos de facturación para los planes. PK: priceid(TINYINT) FK: plansid(TINYINT), currencyid(TINYINT) 
 
-•	planxperson: Asignación de características de plan a personas específicas 
+•	planxperson: Asignación de características de plan a personas específicas. PK: planxpersonid(TINYINT) FK: iduserssubcriptions(INT), featureid(TINYINT) 
 
-•	usersubscriptions: Registro de suscripciones activas de usuarios 
+•	usersubscriptions: Registro de suscripciones activas de usuarios. PK: usersubsid(INT) FK: userid(INT),plansid(TINYINT),priceid(TINYINT) 
 
-•	paymentmethods: Catálogo de métodos de pago disponibles 
+•	paymentmethods: Catálogo de métodos de pago disponibles. PK: paymentmethodid(TINYINT) 
 
-•	userpaymentmethods: Métodos de pago configurados por cada usuario 
+•	userpaymentmethods: Métodos de pago configurados por cada usuario. PK: userpaymentmethodsid(INT) FK: userid(INT), paymentmethod(TINYINT) 
 
-•	payments: Registro de pagos realizados en el sistema 
+•	payments: Registro de pagos realizados en el sistema. PK: paymentsid(TINYINT) FK: userid(INT), userpaymentmethodsid(INT) 
 
-•	transactions: Registro de transacciones financieras 
+•	transactions: Registro de transacciones financieras. PK: trnasactionsid(INT) FK: paymentsid(TINYINT) 
 
-•	transactionType: Tipos de transacciones disponibles 
+•	transactionType: Tipos de transacciones disponibles. PK: transTypeId(TINYINT) FK: transactionsid(INT) 
 
-•	transactionSubTypes: Subtipos específicos de transacciones 
+•	transactionSubTypes: Subtipos específicos de transacciones. PK: transactionSuvTypesId(TINYINT) FK: transactionid(INT)
 
-•	currencies: Catálogo de monedas soportadas por el sistema 
+•	currencies: Catálogo de monedas soportadas por el sistema. PK: currencyId(TINYINT) FK: transactionid(INT) 
 
-•	exchangeRate: Tasas de cambio entre diferentes monedas 
+•	exchangeRate: Tasas de cambio entre diferentes monedas. PK:exchangeRateID (TINYINT) FK: currencyid(TINYINT) 
 
-•	notificationtype: Tipos de notificaciones configurados 
+•	notificationtype: Tipos de notificaciones configurados. PK: notificationtypeid(TINYINT) 
 
-•	notificationtemplate: Plantillas para los diferentes tipos de notificaciones 
+•	notificationtemplate: Plantillas para los diferentes tipos de notificaciones. PK: templateid(TINYINT) FK:notificationid(TINYINT) 
 
-•	notifications: Registro de notificaciones enviadas 
+•	notifications: Registro de notificaciones enviadas. PK: idnotifications(INT) FK: userid(INT),templateid(TINYINT) 
 
-•	files: Registro de archivos almacenados en el sistema 
+•	files: Registro de archivos almacenados en el sistema. PK: idfile(INT) FK:userid(INT) 
 
-•	languages: Idiomas disponibles en el sistema 
+•	languages: Idiomas disponibles en el sistema. PK: languageid(TINYINT) 
 
-•	translation: Traducciones para la internacionalización del sistema 
+•	translation: Traducciones para la internacionalización del sistema. PK: translationid(TINYINT) FK: moduleid(INT), languageid(TINYINT)
 
-•	modules: Módulos funcionales del sistema 
+•	modules: Módulos funcionales del sistema. PK: moduleid(INT) 
 
-•	logs: Registro de actividades y eventos del sistema 
+•	logs: Registro de actividades y eventos del sistema. PK: logid(TINYINT) FK: logtypeid(TINYINT), logsourceid(TINYINT), logseverity(TINYINT), userid(INT)
 
-•	logseverity: Niveles de severidad para las entradas de log 
+•	logseverity: Niveles de severidad para las entradas de log. PK: logseverityid (TINYINT) 
 
-•	logtypes: Tipos de entradas de log 
+•	logtypes: Tipos de entradas de log. PK: logtypeid(TINYINT) 
 
-•	logsources: Fuentes u orígenes de las entradas de log
+•	logsources: Fuentes u orígenes de las entradas de log. PK:logsourceid(TINYINT)
 
 
 Ahora explicaremos más a fondo las principales identidades:
