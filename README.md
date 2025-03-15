@@ -1,4 +1,8 @@
 # entregable#1
+Rodrigo Sebastian Donoso Chaves-2024070154
+
+Adrian Josue Barquero Sanchez-2024146907
+
 Tabla de identidades: 
 
 •	users: Almacena información de usuarios del sistema 
