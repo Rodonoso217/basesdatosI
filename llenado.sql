@@ -465,7 +465,7 @@ BEGIN
                     );
                     
                     -- Generar algunos errores para la transcripción
-                    IF RAND() > 0.6 THEN -- 40% de probabilidad de error
+                    IF RAND() > 0.2 THEN -- 80% de probabilidad de error
                         -- Decidir cuántos errores generar (1-3)
                         SET error_count = FLOOR(1 + RAND() * 3);
                         
