@@ -3,7 +3,7 @@ Rodrigo Sebastian Donoso Chaves-2024070154
 
 Adrian Josue Barquero Sanchez-2024146907
 
-Tabla de identidades: 
+Tabla de entidades: 
 
 •	users: Almacena información de usuarios del sistema. PK: userid (INT)
 
@@ -68,9 +68,9 @@ Tabla de identidades:
 
 Ahora explicaremos más a fondo las principales identidades:
 
-Users: esta identidad es primordial para el funcionamiento de la app. Es en donde se guarda toda la información del cliente, desde la información que se usa para identificar el usuario, el id, como datos que se podrían usar luego como email, nombre, la fecha de registro y la contraseña. Esta es la base del proyecto y se conecta con varias identidades como los userroles, usersubscriptions, userpermisions, userpaymentmethod. Es bastante simple, pero a su vez bastante importante.
+Users: esta entidad es primordial para el funcionamiento de la app. Es en donde se guarda toda la información del cliente, desde la información que se usa para identificar el usuario, el id, como datos que se podrían usar luego como email, nombre, la fecha de registro y la contraseña. Esta es la base del proyecto y se conecta con varias identidades como los userroles, usersubscriptions, userpermisions, userpaymentmethod. Es bastante simple, pero a su vez bastante importante.
 
-Roles: Identidad que almacena los diferentes tipos de roles que pueden tener los usuarios en el sistema. Cada rol define un conjunto de permisos y capacidades dentro de la aplicación. Se conecta con userroles para asignar roles a usuarios específicos y con rolepermissions para definir qué permisos tiene cada rol. Es fundamental para el sistema de seguridad y control de acceso.
+Roles: entidad que almacena los diferentes tipos de roles que pueden tener los usuarios en el sistema. Cada rol define un conjunto de permisos y capacidades dentro de la aplicación. Se conecta con userroles para asignar roles a usuarios específicos y con rolepermissions para definir qué permisos tiene cada rol. Es fundamental para el sistema de seguridad y control de acceso.
 
 Permissions: Esta entidad contiene la lista de todas las acciones posibles que se pueden realizar en el sistema. Cada permiso representa una capacidad específica como crear, leer, modificar o eliminar recursos. Se relaciona con roles a través de rolepermissions y directamente con usuarios mediante userpermissions. Forma la base del sistema de autorización granular del proyecto.
 
