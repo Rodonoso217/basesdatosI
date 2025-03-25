@@ -3,7 +3,7 @@ Rodrigo Sebastian Donoso Chaves-2024070154
 
 Adrian Josue Barquero Sanchez-2024146907
 
-[Creacion Base de Datos]creacionBD.sql
+[Creacion Base de Datos](./main/creacionBD.sql)
 
 [Consultas]queries.sql
 
