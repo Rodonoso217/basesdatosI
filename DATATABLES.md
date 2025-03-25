@@ -158,3 +158,20 @@ ORDER BY \
 | 41 | Juan Pérez 41     | 5      | 8.05  | 43.2000   |
 | 34 | Juan Pérez 34     | 7      | 9.88  | 26.2857   |
 | 19 | Carlos Rodríguez 19 | 8    | 7.49  | 43.5000   |
+
+## 4.4 Top de los errores de la AI
+SELECT \
+    ae.errorclassid,\
+    ae.categoryname,\
+    ae.description AS error_category_description,\
+    COUNT(te.iderrors) AS error_count\
+FROM \
+    aierrorclass ae\
+JOIN \
+    transcriptionerrors te ON ae.errorclassid = te.errorclassid\
+WHERE \
+    te.trytime >='2024-01-01 00:00:00'\
+GROUP BY \
+    ae.errorclassid, ae.categoryname, ae.description\
+ORDER BY \
+    error_count DESC;
