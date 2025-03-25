@@ -17,6 +17,8 @@ BEGIN
     DECLARE subscription_amount DECIMAL(10,2);
     DECLARE usage_count INT;
     DECLARE error_count INT;
+    DECLARE conv_status VARCHAR(20);
+    DECLARE conv_lang VARCHAR(2);
     
     -- Limpiar datos existentes para evitar duplicados
     SET FOREIGN_KEY_CHECKS = 0;
@@ -41,6 +43,7 @@ BEGIN
     TRUNCATE TABLE conversationinteractions;
     TRUNCATE TABLE conversations;
     TRUNCATE TABLE logs;
+    TRUNCATE TABLE files;
     
     SET FOREIGN_KEY_CHECKS = 1;
     
@@ -363,21 +366,35 @@ BEGIN
         SET i = i + 1;
     END WHILE;
     
-    -- 13. Generar conversaciones, interacciones y transcripciones
     SET i = 1;
     WHILE i <= total_users DO
         -- Solo crear datos para usuarios activos
         SELECT isactive INTO @is_active FROM users WHERE userid = i;
         
         IF @is_active = 1 THEN
-            -- Crear entre 1 y 10 conversaciones por usuario
-            SET @conversation_count = FLOOR(1 + RAND() * 10);
+            -- Garantizar al menos 1 conversación por usuario activo (máximo 3)
+            SET @conversation_count = GREATEST(1, FLOOR(RAND() * 3));
+            
+            -- Debug: Mostrar información de generación
+            SELECT CONCAT('[DEBUG] Usuario ', i, ' - Conversaciones a generar: ', @conversation_count) AS log;
             
             SET j = 1;
             WHILE j <= @conversation_count DO
-                -- Fecha de conversación entre 1 y 90 días atrás
-                SET random_date = DATE_SUB(NOW(), INTERVAL FLOOR(1 + RAND() * 90) DAY);
+                -- Fecha de conversación entre 1 y 30 días atrás
+                SET random_date = DATE_SUB(NOW(), INTERVAL FLOOR(1 + RAND() * 30) DAY);
+                SET @conversation_id = (i * 1000) + j;  -- ID único garantizado
                 
+                -- Status: 80% finalizadas, 15% activas, 5% fallidas
+                SET conv_status = CASE 
+                    WHEN RAND() <= 0.8 THEN 'finalizada'
+                    WHEN RAND() <= 0.95 THEN 'activa'
+                    ELSE 'fallida'
+                END;
+                
+                -- Idioma: 70% español, 30% inglés
+                SET conv_lang = IF(RAND() <= 0.7, 'es', 'en');
+                
+                -- Insertar conversación
                 INSERT INTO conversations (
                     idconversations,
                     startdate,
@@ -388,31 +405,24 @@ BEGIN
                     userid
                 )
                 VALUES (
-                    (i * 100) + j, -- ID único
+                    @conversation_id,
                     random_date,
-                    DATE_ADD(random_date, INTERVAL FLOOR(5 + RAND() * 120) MINUTE),
-                    CASE 
-                        WHEN RAND() > 0.1 THEN 'finalizada'
-                        WHEN RAND() > 0.5 THEN 'activa'
-                        ELSE 'fallida'
-                    END,
-                    'Último mensaje de la conversación',
-                    CASE 
-                        WHEN RAND() > 0.3 THEN 'es'
-                        ELSE 'en'
-                    END,
+                    DATE_ADD(random_date, INTERVAL FLOOR(5 + RAND() * 60) MINUTE),
+                    conv_status,
+                    CONCAT('Msg-', i, '-', j, '-', FLOOR(RAND() * 1000)),
+                    conv_lang,
                     i
                 );
                 
-                -- ID de la conversación
-                SET @conversation_id = (i * 100) + j;
+                -- Debug: Confirmar inserción
+                SELECT CONCAT('[DEBUG] Conversación insertada - ID: ', @conversation_id) AS log;
                 
-                -- Crear interacciones y transcripciones para esta conversación
-                SET @interaction_count = FLOOR(1 + RAND() * 20);
-                
+                -- Generar interacciones (2-5 por conversación)
+                SET @interaction_count = FLOOR(2 + RAND() * 4);
                 SET k = 1;
+                
                 WHILE k <= @interaction_count DO
-                    -- Simular archivos
+                    -- Insertar archivo de audio
                     INSERT INTO files (
                         idfile,
                         file_name,
@@ -422,15 +432,15 @@ BEGIN
                         entityid
                     )
                     VALUES (
-                        (@conversation_id * 1000) + k, -- ID único
+                        (@conversation_id * 100) + k,
                         CONCAT('audio_', @conversation_id, '_', k, '.mp3'),
                         'recording',
-                        CONCAT('https://storage/recordings/', @conversation_id, '_', k, '.mp3'),
+                        CONCAT('https://storage/', @conversation_id, '_', k, '.mp3'),
                         DATE_ADD(random_date, INTERVAL k MINUTE),
-                        1 -- Entityid (solo para relacionar)
+                        1
                     );
                     
-                    -- Crear interacción
+                    -- Insertar interacción
                     INSERT INTO conversationinteractions (
                         idinteractions,
                         sequencenumber,
@@ -439,14 +449,14 @@ BEGIN
                         idconversations
                     )
                     VALUES (
-                        (@conversation_id * 1000) + k, -- ID único
+                        (@conversation_id * 100) + k,
                         k,
                         DATE_ADD(random_date, INTERVAL k MINUTE),
-                        (@conversation_id * 1000) + k, -- file ID
+                        (@conversation_id * 100) + k,
                         @conversation_id
                     );
                     
-                    -- Crear transcripción
+                    -- Insertar transcripción (90% completadas)
                     INSERT INTO transcription (
                         idtranscription,
                         fulltranscript,
@@ -456,20 +466,19 @@ BEGIN
                         idinteractions
                     )
                     VALUES (
-                        (@conversation_id * 1000) + k, -- ID único
-                        CONCAT('Transcripción del audio ', k, ' en la conversación'),
+                        (@conversation_id * 100) + k,
+                        CONCAT('Transcript ', k, ': ', FLOOR(RAND() * 10000)),
                         CONCAT('audio_', @conversation_id, '_', k, '.mp3'),
-                        DATE_ADD(random_date, INTERVAL k MINUTE),
-                        CASE WHEN RAND() > 0.1 THEN 'completado' ELSE 'fallido' END,
-                        (@conversation_id * 1000) + k
+                        DATE_ADD(random_date, INTERVAL k + 1 MINUTE),
+                        IF(RAND() > 0.1, 'completado', 'fallido'),
+                        (@conversation_id * 100) + k
                     );
                     
-                    -- Generar algunos errores para la transcripción
-                    IF RAND() > 0.2 THEN -- 80% de probabilidad de error
-                        -- Decidir cuántos errores generar (1-3)
+                    -- Generar errores de transcripción (60% de probabilidad)
+                    IF RAND() <= 0.6 THEN
                         SET error_count = FLOOR(1 + RAND() * 3);
-                        
                         SET @error_iter = 1;
+                        
                         WHILE @error_iter <= error_count DO
                             INSERT INTO transcriptionerrors (
                                 iderrors,
@@ -481,7 +490,7 @@ BEGIN
                                 errorclassid
                             )
                             VALUES (
-                                ((@conversation_id * 1000) + k) * 10 + @error_iter, -- ID único
+                                ((@conversation_id * 100) + k) * 10 + @error_iter,
                                 CONCAT('ERR-', FLOOR(100 + RAND() * 900)),
                                 CASE 
                                     WHEN RAND() > 0.7 THEN 'critical'
@@ -489,15 +498,10 @@ BEGIN
                                     ELSE 'info'
                                 END,
                                 DATE_ADD(random_date, INTERVAL k MINUTE),
-                                CASE 
-                                    WHEN @error_iter = 1 THEN 'Error reconociendo entidad de pago'
-                                    WHEN @error_iter = 2 THEN 'Error interpretando monto'
-                                    ELSE 'Error manteniendo contexto'
-                                END,
-                                (@conversation_id * 1000) + k, -- ID transcripción
-                                FLOOR(1 + RAND() * 7) -- Clase de error
+                                CONCAT('Error ', @error_iter, ' en transcripción'),
+                                (@conversation_id * 100) + k,
+                                FLOOR(1 + RAND() * 7)
                             );
-                            
                             SET @error_iter = @error_iter + 1;
                         END WHILE;
                     END IF;
@@ -511,7 +515,259 @@ BEGIN
         
         SET i = i + 1;
     END WHILE;
+    
+    -- Generar logs de sistema
+    INSERT INTO logs (log_date, log_level, message, userid)
+    SELECT 
+        DATE_SUB(NOW(), INTERVAL FLOOR(RAND() * 30) DAY),
+        CASE 
+            WHEN RAND() > 0.7 THEN 'ERROR'
+            WHEN RAND() > 0.4 THEN 'WARNING'
+            ELSE 'INFO'
+        END,
+        CONCAT('Log entry ', FLOOR(RAND() * 1000)),
+        userid
+    FROM users
+    WHERE isactive = 1
+    LIMIT 100;
+    
+    SELECT '[DEBUG] Proceso completado exitosamente' AS final_status;
+END //
 
+
+CREATE PROCEDURE PopulateUsageData()
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE j INT DEFAULT 1;
+    DECLARE total_users INT DEFAULT 50;
+    DECLARE usage_count INT;
+    DECLARE random_date DATETIME;
+    DECLARE session_duration INT;
+    DECLARE debug_message VARCHAR(255);
+    
+    -- Desactivar restricciones temporalmente
+    SET FOREIGN_KEY_CHECKS = 0;
+    
+    -- Limpiar tabla existente (opcional)
+    TRUNCATE TABLE appusage;
+    
+    -- Generar datos con distribución estratificada
+    SET debug_message = CONCAT('Generando datos de appusage para ', total_users, ' usuarios');
+    
+    
+    WHILE i <= total_users DO
+        -- Verificar si el usuario está activo
+        SELECT isactive INTO @is_active FROM users WHERE userid = i;
+        
+        IF @is_active = 1 THEN
+            -- Definir cantidad de registros según segmento de usuario
+            IF i <= 15 THEN
+                -- Usuarios top (intensivos): 30-80 registros
+                SET usage_count = FLOOR(30 + RAND() * 50);
+            ELSEIF i > (total_users - 15) THEN
+                -- Usuarios bottom (ocasionales): 1-6 registros
+                SET usage_count = FLOOR(1 + RAND() * 5);
+            ELSE
+                -- Usuarios regulares: 5-30 registros
+                SET usage_count = FLOOR(5 + RAND() * 25);
+            END IF;
+            
+            -- Generar sesiones para este usuario
+            SET j = 1;
+            WHILE j <= usage_count DO
+                -- Fecha aleatoria en los últimos 90 días
+                SET random_date = DATE_SUB(NOW(), INTERVAL FLOOR(1 + RAND() * 90) DAY);
+                
+                -- Duración de sesión entre 5 minutos y 2 horas (en segundos)
+                SET session_duration = FLOOR(300 + RAND() * 7200);
+                
+                -- Insertar registro con manejo de duplicados
+                INSERT INTO appusage (
+                    userid,
+                    logindate,
+                    logoutdate,
+                    sessionduration,
+                    actionsperformed,
+                    ipaddress
+                ) VALUES (
+                    i,
+                    random_date,
+                    DATE_ADD(random_date, INTERVAL session_duration SECOND),
+                    session_duration,
+                    FLOOR(1 + RAND() * 100),
+                    CONCAT('192.168.', FLOOR(1 + RAND() * 254), '.', FLOOR(1 + RAND() * 254))
+                ) ON DUPLICATE KEY UPDATE 
+                    logoutdate = VALUES(logoutdate),
+                    sessionduration = VALUES(sessionduration);
+                
+                SET j = j + 1;
+            END WHILE;
+            
+	
+        END IF;
+        
+        SET i = i + 1;
+    END WHILE;
+    
+    -- Reactivar restricciones
+    SET FOREIGN_KEY_CHECKS = 1;
+    
+   
+END //
+
+
+-- Esta vara todavia no funciona, no se 
+CREATE PROCEDURE PopulateConversationData()
+BEGIN
+    DECLARE i INT DEFAULT 0;
+    DECLARE j INT DEFAULT 0;
+    DECLARE k INT DEFAULT 0;
+    DECLARE total_users INT DEFAULT 50;
+    DECLARE debug_message VARCHAR(255);
+    DECLARE error_count INT;
+    DECLARE error_iter INT;
+    
+    -- Desactivar restricciones temporalmente
+    SET FOREIGN_KEY_CHECKS = 0;
+    
+    -- 1. Generación de conversaciones
+    SELECT COUNT(*) INTO @active_users FROM users WHERE isactive = 1;
+    SET debug_message = CONCAT('Generando datos para ', @active_users, ' usuarios activos');
+    SELECT debug_message AS log;
+    
+    SET i = 1;
+    WHILE i <= total_users DO
+        SELECT isactive INTO @is_active FROM users WHERE userid = i;
+        
+        IF @is_active = 1 THEN
+            -- Generar 1-3 conversaciones por usuario
+            SET @conversation_count = FLOOR(1 + RAND() * 3);
+            SET j = 1;
+            
+            WHILE j <= @conversation_count DO
+                SET @conversation_id = (i * 1000) + j;
+                SET @start_date = DATE_SUB(NOW(), INTERVAL FLOOR(1 + RAND() * 30) DAY);
+                
+                -- Insertar conversación
+                INSERT INTO conversations (
+                    idconversations,
+                    startdate,
+                    enddate,
+                    status,
+                    lastmessagge,
+                    language,
+                    userid
+                ) VALUES (
+                    @conversation_id,
+                    @start_date,
+                    DATE_ADD(@start_date, INTERVAL FLOOR(5 + RAND() * 60) MINUTE),
+                    CASE 
+                        WHEN RAND() <= 0.8 THEN 'finalizada'
+                        WHEN RAND() <= 0.95 THEN 'activa'
+                        ELSE 'fallida'
+                    END,
+                    CONCAT('Conversación ', @conversation_id),
+                    IF(RAND() <= 0.7, 'es', 'en'),
+                    i
+                );
+                
+                -- 2. Generar interacciones (2-5 por conversación)
+                SET @interaction_count = FLOOR(2 + RAND() * 4);
+                SET k = 1;
+                
+                WHILE k <= @interaction_count DO
+                    SET @interaction_id = (@conversation_id * 100) + k;
+                    SET @interaction_date = DATE_ADD(@start_date, INTERVAL k * 5 MINUTE);
+                    
+                    -- Insertar interacción
+                    INSERT INTO conversationinteractions (
+                        idinteractions,
+                        sequencenumber,
+                        datetime,
+                        idconversations
+                    ) VALUES (
+                        @interaction_id,
+                        k,
+                        @interaction_date,
+                        @conversation_id
+                    );
+                    
+                    -- 3. Insertar transcripción
+                    INSERT INTO transcription (
+                        idtranscription,
+                        fulltranscript,
+                        createddate,
+                        status,
+                        idinteractions
+                    ) VALUES (
+                        @interaction_id,
+                        CONCAT('Transcripción completa de interacción ', @interaction_id),
+                        DATE_ADD(@interaction_date, INTERVAL 1 MINUTE),
+                        IF(RAND() > 0.1, 'completado', 'fallido'),
+                        @interaction_id
+                    );
+                    
+                    -- 4. Generar errores de transcripción (60% de probabilidad)
+                    IF RAND() <= 0.6 THEN
+                        SET error_count = FLOOR(1 + RAND() * 3); -- 1-3 errores
+                        SET error_iter = 1;
+                        
+                        WHILE error_iter <= error_count DO
+                            INSERT INTO transcriptionerrors (
+                                iderrors,
+                                errorcode,
+                                errortype,
+                                trytime,
+                                errordescription,
+                                idtranscription,
+                                errorclassid
+                            ) VALUES (
+                                (@interaction_id * 10) + error_iter,
+                                CONCAT('ERR-', FLOOR(100 + RAND() * 900)),
+                                CASE 
+                                    WHEN RAND() > 0.7 THEN 'critical'
+                                    WHEN RAND() > 0.4 THEN 'warning'
+                                    ELSE 'info'
+                                END,
+                                @interaction_date,
+                                CASE 
+                                    WHEN error_iter = 1 THEN 'Error de reconocimiento de voz'
+                                    WHEN error_iter = 2 THEN 'Falta de contexto'
+                                    ELSE 'Problema de formato'
+                                END,
+                                @interaction_id,
+                                FLOOR(1 + RAND() * 7) -- 1-7 tipos de error
+                            );
+                            
+                            SET error_iter = error_iter + 1;
+                        END WHILE;
+                    END IF;
+                    
+                    SET k = k + 1;
+                END WHILE;
+                
+                SET j = j + 1;
+            END WHILE;
+        END IF;
+        
+        SET i = i + 1;
+    END WHILE;
+    
+    -- Reactivar restricciones
+    SET FOREIGN_KEY_CHECKS = 1;
+    
+    -- Resultados finales
+    SELECT 'Proceso completado' AS resultado;
+    SELECT 
+        'conversations' AS tabla, 
+        COUNT(*) AS total 
+    FROM conversations
+    UNION ALL
+    SELECT 'conversationinteractions', COUNT(*) FROM conversationinteractions
+    UNION ALL
+    SELECT 'transcription', COUNT(*) FROM transcription
+    UNION ALL
+    SELECT 'transcriptionerrors', COUNT(*) FROM transcriptionerrors;
 END //
 
 DELIMITER ;
