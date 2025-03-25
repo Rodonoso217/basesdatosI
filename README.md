@@ -5,7 +5,11 @@ Adrian Josue Barquero Sanchez-2024146907
 
 [Creacion Base de Datos](./creacionBD.sql)
 
-[Consultas]queries.sql
+[Llenado Base de Datos](./llenado.sql)
+
+[Consultas](./queries.sql)
+
+[DataTables](./DATATABLES.md)
 
 
 
