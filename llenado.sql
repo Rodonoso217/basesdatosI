@@ -6,7 +6,7 @@ BEGIN
     DECLARE i INT DEFAULT 0;
     DECLARE j INT DEFAULT 0;
     DECLARE k INT DEFAULT 0;
-    DECLARE total_users INT DEFAULT 50;
+    DECLARE total_users INT DEFAULT 200;
     DECLARE random_number INT;
     DECLARE random_date DATETIME;
     DECLARE random_email VARCHAR(100);
@@ -188,7 +188,7 @@ BEGIN
             SET random_number = FLOOR(1 + RAND() * 100);
             
             -- 30% de usuarios con suscripción próxima a vencer (menos de 15 días)
-            IF random_number <= 30 THEN
+            IF random_number <= 90 THEN
                 SET subscription_start_date = DATE_SUB(NOW(), INTERVAL FLOOR(11 + RAND() * 6) MONTH);
                 SET subscription_end_date = DATE_ADD(NOW(), INTERVAL FLOOR(1 + RAND() * 14) DAY);
             ELSE
@@ -314,7 +314,7 @@ BEGIN
     END WHILE;
     
     -- 12. Generar registros de uso de la aplicación
-    -- Crearemos múltiples registros para cada usuario con diferentes patrones
+    -- Múltiples registros para cada usuario con diferentes patrones
     SET i = 1;
     WHILE i <= total_users DO
         -- Solo crear registros para usuarios activos
@@ -548,7 +548,7 @@ BEGIN
     -- Desactivar restricciones temporalmente
     SET FOREIGN_KEY_CHECKS = 0;
     
-    -- Limpiar tabla existente (opcional)
+    -- Limpiar tabla existente 
     TRUNCATE TABLE appusage;
     
     -- Generar datos con distribución estratificada
