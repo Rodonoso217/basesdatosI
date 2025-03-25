@@ -489,7 +489,7 @@ ENGINE = InnoDB;
 CREATE TABLE IF NOT EXISTS `paymentAssistant`.`files` (
   `idfile` INT NOT NULL AUTO_INCREMENT,
   `file_name` VARCHAR(250) NOT NULL,
-  `file_type` ENUM('recording', 'document', 'media') NOT NULL,
+  `file_type` VARCHAR(100) NOT NULL,
   `storage_url` VARCHAR(500) NOT NULL,
   `update_date` DATETIME NOT NULL,
   `entityid` INT NOT NULL,
@@ -837,7 +837,7 @@ ENGINE = InnoDB;
 -- Table `paymentAssistant`.`conversations`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `paymentAssistant`.`conversations` (
-  `idconversations` INT NOT NULL,
+  `idconversations` INT NOT NULL AUTO_INCREMENT,
   `startdate` DATETIME NOT NULL,
   `enddate` DATETIME NULL,
   `status` ENUM('activa', 'finalizada', 'fallida') NOT NULL,
@@ -858,7 +858,7 @@ ENGINE = InnoDB;
 -- Table `paymentAssistant`.`conversationinteractions`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `paymentAssistant`.`conversationinteractions` (
-  `idinteractions` INT NOT NULL,
+  `idinteractions` INT NOT NULL AUTO_INCREMENT,
   `sequencenumber` INT NOT NULL,
   `datetime` TIMESTAMP NOT NULL,
   `idfile` INT NOT NULL,
@@ -883,7 +883,7 @@ ENGINE = InnoDB;
 -- Table `paymentAssistant`.`transcription`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `paymentAssistant`.`transcription` (
-  `idtranscription` INT NOT NULL,
+  `idtranscription` INT NOT NULL AUTO_INCREMENT,
   `fulltranscript` TEXT NOT NULL,
   `audiofilename` VARCHAR(45) NOT NULL,
   `createddate` DATETIME NOT NULL,
@@ -903,7 +903,7 @@ ENGINE = InnoDB;
 -- Table `paymentAssistant`.`paymententities`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `paymentAssistant`.`paymententities` (
-  `identities` INT NOT NULL,
+  `identities` INT NOT NULL AUTO_INCREMENT,
   `type` VARCHAR(45) NOT NULL,
   `value` VARCHAR(245) NOT NULL,
   `confidence` FLOAT NOT NULL,
@@ -935,7 +935,7 @@ ENGINE = InnoDB;
 -- Table `paymentAssistant`.`transcriptionerrors`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `paymentAssistant`.`transcriptionerrors` (
-  `iderrors` INT NOT NULL,
+  `iderrors` INT NOT NULL AUTO_INCREMENT,
   `errorcode` VARCHAR(120) NOT NULL,
   `errortype` VARCHAR(45) NOT NULL,
   `trytime` DATETIME NOT NULL,
@@ -1017,3 +1017,4 @@ ENGINE = InnoDB;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
