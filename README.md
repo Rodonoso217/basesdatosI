@@ -1,3 +1,23 @@
+# entregable#2
+Rodrigo Sebastian Donoso Chaves-2024070154
+
+Adrian Josue Barquero Sanchez-2024146907
+
+[Creacion Base de Datos]creacionBD.sql
+
+[Consultas]queries.sql
+
+
+
+
+
+
+
+
+
+
+
+
 # entregable#1
 Rodrigo Sebastian Donoso Chaves-2024070154
 
