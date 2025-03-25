@@ -63,7 +63,6 @@ LIMIT 15;
 
 -- Top 15 usuarios con menos sesiones
 SELECT 
-    ROW_NUMBER() OVER () AS Top,
     u.userid,
     u.name AS Nombre,
     COUNT(a.usageid) AS Sesiones,
