@@ -63,6 +63,7 @@ LIMIT 15;
 
 -- Top 15 usuarios con menos sesiones
 SELECT 
+    ROW_NUMBER() OVER () AS Top,
     u.userid,
     u.name AS Nombre,
     COUNT(a.usageid) AS Sesiones,
@@ -72,10 +73,12 @@ FROM
     users u
 JOIN 
     appusage a ON u.userid = a.userid
+WHERE
+    u.isactive = 1
 GROUP BY 
     u.userid, u.name
 ORDER BY 
-    Sesiones ASC, Horas_Uso ASC 
+    Sesiones ASC, Horas_Uso ASC
 LIMIT 15;
 -- 4.4 Top de los errores de la AI
 SELECT 
@@ -92,6 +95,55 @@ WHERE
 GROUP BY 
     ae.errorclassid, ae.categoryname, ae.description
 ORDER BY 
-    error_count DESC;
-
-CALL PopulatePaymentAssistantDB()
+    error_count DESC;alter
+    
+    
+    -- ver tablas
+SELECT 
+    'currencies' AS table_name, 
+    COUNT(*) AS count 
+FROM currencies
+UNION ALL
+SELECT 'country', COUNT(*) FROM country
+UNION ALL
+SELECT 'users', COUNT(*) FROM users
+UNION ALL
+SELECT 'paymentmethods', COUNT(*) FROM paymentmethods
+UNION ALL
+SELECT 'userpaymentmethods', COUNT(*) FROM userpaymentmethods
+UNION ALL
+SELECT 'plans', COUNT(*) FROM plans
+UNION ALL
+SELECT 'planpricing', COUNT(*) FROM planpricing
+UNION ALL
+SELECT 'userssubscriptions', COUNT(*) FROM userssubscriptions
+UNION ALL
+SELECT 'payments', COUNT(*) FROM payments
+UNION ALL
+SELECT 'exchangeRate', COUNT(*) FROM exchangeRate
+UNION ALL
+SELECT 'transactions', COUNT(*) FROM transactions
+UNION ALL
+SELECT 'appusage', COUNT(*) FROM appusage
+UNION ALL
+SELECT 'contactinfotype', COUNT(*) FROM contactinfotype
+UNION ALL
+SELECT 'contactinfoperperson', COUNT(*) FROM contactinfoperperson
+UNION ALL
+SELECT 'aierrorclass', COUNT(*) FROM aierrorclass
+UNION ALL
+SELECT 'transcriptionerrors', COUNT(*) FROM transcriptionerrors
+UNION ALL
+SELECT 'transcription', COUNT(*) FROM transcription
+UNION ALL
+SELECT 'conversationinteractions', COUNT(*) FROM conversationinteractions
+UNION ALL
+SELECT 'conversations', COUNT(*) FROM conversations
+UNION ALL
+SELECT 'logs', COUNT(*) FROM logs
+UNION ALL
+SELECT 'files', COUNT(*) FROM files;
+-- calls
+CALL PopulatePaymentAssistantDB();
+CALL PopulateUsageData();
+CALL PopulateConversationData()
